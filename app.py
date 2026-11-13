@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 st.title("✍️ Diffusion Handwriting Generation")
-st.markdown("Generate realistic handwritten text using diffusion models.")
+st.markdown("Upload a reference handwriting image and generate custom handwritten text using diffusion models.")
 
 
 @st.cache_resource
@@ -74,23 +74,23 @@ diff_mode = st.selectbox(
     help="'new' uses Eq 12 from the paper; 'standard' uses Eq 9.",
 )
 
-# Check ./assets for writer sample images (supporting .tif files from IAM dataset)
-asset_dir = "./assets"
-if os.path.exists(asset_dir):
-    asset_files = sorted([
-        f for f in os.listdir(asset_dir)
-        if f.lower().endswith((".png", ".jpg", ".jpeg", ".tif"))
-    ])
-else:
-    asset_files = []
+# --- File Uploader for Style Reference ---
+uploaded_file = st.file_uploader(
+    "Upload Reference Handwriting Image",
+    type=["png", "jpg", "jpeg", "tif"],
+    help="Upload a sample image of handwriting to extract its style."
+)
 
-if asset_files:
-    selected_writer = st.selectbox("Select Writer Style Sample", options=asset_files)
-    sourcename = os.path.join(asset_dir, selected_writer)
-    with st.expander("Preview selected writer style"):
+if uploaded_file is not None:
+    # Save uploaded file temporarily so preprocessing can read it via path
+    sourcename = "./temp_style_image.tif"
+    with open(sourcename, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    
+    with st.expander("Preview uploaded style"):
         st.image(sourcename, width=300)
 else:
-    st.error("No writer images found in `./assets/`. Please add sample `.tif` files to your repo's `assets` folder.")
+    st.info("👆 Please upload a reference handwriting image above to proceed.")
     st.stop()
 
 # --- Generation Trigger ---
