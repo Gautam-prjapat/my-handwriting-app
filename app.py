@@ -46,8 +46,10 @@ def load_diffusion_model():
     model = nn.DiffusionWriter(num_layers=2, c1=C1, c2=C2, c3=C3)
 
     # warm-up pass builds the variables so the weights can be loaded
+    # sigma must be rank 3 [B, 1, 1] (as at inference). A rank-2 warm-up makes newer Keras build
+    # sigma_ffn for 2-D input, which silently breaks broadcasting for batch sizes > 1.
     model(tf.random.normal([1, 400, 2]), tf.random.uniform([1, 40], dtype=tf.int32, maxval=50),
-          tf.random.uniform([1, 1]), tf.random.normal([1, 14, 1280]))
+          tf.random.uniform([1, 1, 1]), tf.random.normal([1, 14, 1280]))
     model.load_weights(weights_path)
 
     @tf.function(reduce_retracing=True)
