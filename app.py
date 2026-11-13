@@ -109,8 +109,14 @@ if st.button("Generate Handwriting", type="primary"):
                 if os.path.exists(output_path):
                     os.remove(output_path)
 
-                # Extract writer style vector (resized to 96x96 RGB for MobileNetV2)
-                pil_img = Image.open(sourcename).convert("RGB").resize((96, 96))
+                # Extract writer style vector (handle multi-page TIFFs, convert to 96x96 RGB)
+                pil_img = Image.open(sourcename)
+                if hasattr(pil_img, "seek"):
+                    try:
+                        pil_img.seek(0)
+                    except Exception:
+                        pass
+                pil_img = pil_img.convert("RGB").resize((96, 96))
                 writer_img = tf.expand_dims(tf.convert_to_tensor(np.array(pil_img), dtype=tf.float32), 0)
                 style_vector = style_extractor(writer_img)
 
