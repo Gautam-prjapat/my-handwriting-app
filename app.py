@@ -9,6 +9,7 @@ import gdown
 import numpy as np
 import streamlit as st
 import tensorflow as tf
+from tensorflow.keras.applications import MobileNetV2
 from PIL import Image, ImageFilter, ImageOps
 
 import nn
@@ -35,6 +36,13 @@ def load_diffusion_model():
     C1 = 128
     C2, C3 = C1 * 3 // 2, C1 * 2
     style_extractor = nn.StyleExtractor()
+    # nn.py hardcodes a 96x96 backbone; the style pipeline needs full-width 96x1400 strips
+    # (height 3 -> pooled to 1, width 44 -> pooled to 14 style tokens). The backbone is
+    # frozen ImageNet weights, so rebuilding it at a new input size changes no trained weights.
+    style_extractor.mobilenet = MobileNetV2(include_top=False, pooling=None, weights="imagenet",
+                                            input_shape=(STYLE_H, STYLE_W, 3))
+    for layer in style_extractor.mobilenet.layers:
+        layer.trainable = False
     model = nn.DiffusionWriter(num_layers=2, c1=C1, c2=C2, c3=C3)
 
     # warm-up pass builds the variables so the weights can be loaded
