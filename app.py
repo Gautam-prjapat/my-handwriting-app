@@ -108,9 +108,10 @@ if st.button("Generate Handwriting", type="primary"):
                 if os.path.exists(output_path):
                     os.remove(output_path)
 
-                # Extract writer style vector using the repository's native preprocessing pipeline
+                # Extract writer style vector with proper preprocessing & 96x96 square resizing for MobileNetV2
                 processed_img = preprocessing.read_img(sourcename, 96)
-                writer_img = tf.expand_dims(processed_img, 0)
+                resized_img = tf.image.resize(processed_img, (96, 96))
+                writer_img = tf.expand_dims(resized_img, 0)
                 style_vector = style_extractor(writer_img)
 
                 # Run inference (passing path without extension so utils.show() handles it correctly)
