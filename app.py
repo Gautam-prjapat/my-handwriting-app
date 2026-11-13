@@ -1,6 +1,7 @@
 import os
 import gdown
 import numpy as np
+from PIL import Image
 import streamlit as st
 import tensorflow as tf
 
@@ -101,43 +102,4 @@ if st.button("Generate Handwriting", type="primary"):
         with st.spinner("Generating handwriting strokes... This may take a few seconds on CPU."):
             try:
                 # Calculate timesteps divisible by 8
-                timesteps = len(text_string) * 16
-                timesteps = timesteps - (timesteps % 8) + 8
-
-                output_path = "./generated_sample.png"
-                if os.path.exists(output_path):
-                    os.remove(output_path)
-
-                # Extract writer style vector
-                writer_img = tf.expand_dims(preprocessing.read_img(sourcename, 96), 0)
-                style_vector = style_extractor(writer_img)
-
-                # Run inference and save output image
-                utils.run_batch_inference(
-                    model,
-                    beta_set,
-                    text_string,
-                    style_vector,
-                    tokenizer=tokenizer,
-                    time_steps=timesteps,
-                    diffusion_mode=diff_mode,
-                    show_samples=False,
-                    path=output_path,
-                )
-
-                # Display result
-                if os.path.exists(output_path):
-                    st.success("Done!")
-                    st.image(output_path, caption=f"Generated: '{text_string}'", use_container_width=True)
-                    with open(output_path, "rb") as img_file:
-                        st.download_button(
-                            label="Download Image",
-                            data=img_file,
-                            file_name="handwriting.png",
-                            mime="image/png",
-                        )
-                else:
-                    st.error("Inference completed, but the output image file was not created.")
-
-            except Exception as e:
-                st.error(f"Error during generation: {e}")
+                timesteps = len(text_string) * 1
