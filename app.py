@@ -105,7 +105,7 @@ if st.button("Generate Handwriting", type="primary"):
                 timesteps = len(text_string) * 16
                 timesteps = timesteps - (timesteps % 8) + 8
 
-                output_path = "./generated_sample.png"
+                output_path = "generated_sample.png"
                 if os.path.exists(output_path):
                     os.remove(output_path)
 
@@ -115,7 +115,7 @@ if st.button("Generate Handwriting", type="primary"):
                 writer_img = tf.expand_dims(tf.expand_dims(writer_img, 0), -1)
                 style_vector = style_extractor(writer_img)
 
-                # Run inference and save output image directly using the utility's built-in path argument
+                # Run inference (passing path without extension so utils.show() handles it correctly)
                 utils.run_batch_inference(
                     model,
                     beta_set,
@@ -125,7 +125,7 @@ if st.button("Generate Handwriting", type="primary"):
                     time_steps=timesteps,
                     diffusion_mode=diff_mode,
                     show_samples=False,
-                    path=output_path,
+                    path="generated_sample",
                 )
 
                 # Display result
@@ -140,7 +140,7 @@ if st.button("Generate Handwriting", type="primary"):
                             mime="image/png",
                         )
                 else:
-                    st.error("Inference completed, but the output image file was not created. Check utils.py save logic.")
+                    st.error("Inference completed, but the output image file was not created.")
 
             except Exception as e:
                 st.error(f"Error during generation: {e}")
