@@ -109,15 +109,10 @@ if st.button("Generate Handwriting", type="primary"):
                 if os.path.exists(output_path):
                     os.remove(output_path)
 
-                # Extract writer style vector (handle multi-page TIFFs, convert to 96x96 RGB)
-                pil_img = Image.open(sourcename)
-                if hasattr(pil_img, "seek"):
-                    try:
-                        pil_img.seek(0)
-                    except Exception:
-                        pass
-                pil_img = pil_img.convert("RGB").resize((96, 96))
-                writer_img = tf.expand_dims(tf.convert_to_tensor(np.array(pil_img), dtype=tf.float32), 0)
+                # Extract writer style vector (96x96 grayscale with 1 channel)
+                pil_img = Image.open(sourcename).convert("L").resize((96, 96))
+                writer_img = tf.convert_to_tensor(np.array(pil_img), dtype=tf.float32) / 255.0
+                writer_img = tf.expand_dims(tf.expand_dims(writer_img, 0), -1)
                 style_vector = style_extractor(writer_img)
 
                 # Run inference and save output image
