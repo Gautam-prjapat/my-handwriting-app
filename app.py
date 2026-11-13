@@ -1,7 +1,6 @@
 import os
 import gdown
 import numpy as np
-from PIL import Image
 import streamlit as st
 import tensorflow as tf
 
@@ -109,10 +108,9 @@ if st.button("Generate Handwriting", type="primary"):
                 if os.path.exists(output_path):
                     os.remove(output_path)
 
-                # Extract writer style vector (96x96 grayscale with 1 channel)
-                pil_img = Image.open(sourcename).convert("L").resize((96, 96))
-                writer_img = tf.convert_to_tensor(np.array(pil_img), dtype=tf.float32) / 255.0
-                writer_img = tf.expand_dims(tf.expand_dims(writer_img, 0), -1)
+                # Extract writer style vector using the repository's native preprocessing pipeline
+                processed_img = preprocessing.read_img(sourcename, 96)
+                writer_img = tf.expand_dims(processed_img, 0)
                 style_vector = style_extractor(writer_img)
 
                 # Run inference (passing path without extension so utils.show() handles it correctly)
